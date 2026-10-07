@@ -6,7 +6,7 @@
 | MSSV | 2A202602925 |
 | Lớp / Khóa | K4 |
 | Repo GitHub | https://github.com/PhucBao1/K4-L3-DAY21-NguyenPhucBao-2A202602925-CI-CD-for-AI-Systems |
-| Ngày nộp | Chưa nộp |
+| Ngày nộp | 07/10/2026 |
 
 ## 1. Bộ Siêu Tham Số Đã Chọn và Lý Do
 
@@ -15,6 +15,7 @@
 | 1 | 100 | 0.1 | 3 | 0.7109 | 0.878 |
 | 2 | 50 | 0.05 | 2 | 0.6051 | 0.846 |
 | 3 | 200 | 0.1 | 5 | 0.7149 | 0.874 |
+| 4 | 200 | 0.2 | 4 | 0.6881 | 0.864 |
 
 **Bộ siêu tham số đã chọn:** `n_estimators=200`, `learning_rate=0.1`, `max_depth=5`.
 
@@ -32,7 +33,7 @@ Khi sàng lọc người thu nhập cao, bỏ sót làm mất cơ hội nên rec
 |---|---|---|
 | Release thất bại khi SSH. | Action không đọc được private key trong secret. | Cập nhật SERVER_SSH_KEY; run sau đã thành công. |
 | Actions bị tắt trên fork. | GitHub vô hiệu hóa workflow khi fork. | Bật Actions và chạy lại pipeline. |
-| Model trên S3 có thể bị thay trước gate. | Upload nằm trong job Train. | Chuyển upload vào Release, sau Quality Gate (thay đổi local). |
+| Model trên S3 có thể bị thay trước gate. | Upload nằm trong job Train. | Chuyển upload vào Release, chỉ chạy sau Quality Gate (run #5 xanh). |
 
 ## 4. So Sánh Bước 2 và Bước 3
 
@@ -45,9 +46,11 @@ Khi sàng lọc người thu nhập cao, bỏ sót làm mất cơ hội nên rec
 
 ## 5. Phần Bonus Đã Thực Hiện
 
-- Bonus 2: Quét 0.1–0.9, bước 0.05; ngưỡng 0.30 đạt F1 0.7537 so với 0.7354 tại 0.5; accuracy giảm còn 0.868.
-- Bonus 3: Xuất confusion matrix, precision/recall từng lớp và artifact detail.txt.
-- Bonus 4: Chặn F1 thấp hơn lần triển khai trước; lưu report S3 sau health check.
-- Bonus 5: Cảnh báo lệch tỷ lệ lớp dương trên 5 điểm phần trăm.
+Tất cả bonus đã chạy trên CI ở run #5 (commit 7af7ad3, ảnh `10-bonus-actions.png`).
 
-Bonus đã kiểm tra local, chưa chạy CI mới. Ngưỡng tối ưu trên holdout này chưa đảm bảo tổng quát hóa.
+- Bonus 2 (`06-threshold.png`): Quét 0.1–0.9, bước 0.05; ngưỡng 0.30 đạt F1 0.7537 so với 0.7354 tại 0.5; accuracy giảm còn 0.868. Ngưỡng chọn trên chính holdout nên F1 này hơi lạc quan.
+- Bonus 3 (`07-detail-report.png`): Confusion matrix, precision/recall từng lớp, `detail.txt` upload cùng `report.json`.
+- Bonus 4 (`08-release-comparison.png`): Release so F1 mới với `report.json` của lần triển khai trước trên S3, chỉ upload model khi không thấp hơn.
+- Bonus 5 (`06-threshold.png`): Tỷ lệ lớp dương 24.78%, lệch < 5 điểm % nên không cảnh báo; ghi `positive_ratio` vào report.
+
+**Quality gate chặn Release** (`09-quality-gate-chan.png`): run 37634677301 trên branch `demo-gate` với tham số yếu (10 / 0.01 / 1) cho F1 0.5577 < 0.65; job Quality Gate fail và Release bị skip, model trên S3/VM không bị thay. Branch này không merge vào main.
