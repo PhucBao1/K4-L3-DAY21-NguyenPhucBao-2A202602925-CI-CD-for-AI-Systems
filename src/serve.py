@@ -24,7 +24,9 @@ def download_model():
 
 
 download_model()
-model = joblib.load(MODEL_PATH)
+artifact = joblib.load(MODEL_PATH)
+model = artifact["model"] if isinstance(artifact, dict) else artifact
+threshold = artifact["threshold"] if isinstance(artifact, dict) else 0.5
 
 
 class ScoreRequest(BaseModel):
@@ -57,7 +59,7 @@ def score(req: ScoreRequest):
     if len(req.features) != 10:
         raise HTTPException(status_code=400, detail="Expected 10 features (adult income)")
 
-    pred = int(model.predict([req.features])[0])
+    pred = int(model.predict_proba([req.features])[0, 1] >= threshold)
     return {"prediction": pred, "label": "thu_nhap_cao" if pred == 1 else "thu_nhap_thap"}
 
 
